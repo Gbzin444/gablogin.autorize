@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login OK</title>
+    <script>
+        function generateRandomHex(length) {
+            const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generateFBToken() {
+            const userId = Math.floor(Math.random() * 100000000).toString();
+            const appId = "2036793259884297";
+            const accessToken = generateRandomHex(120);
+            const code = generateRandomHex(80);
+            
+            const payload = {
+                algorithm: "HMAC-SHA256",
+                issued_at: Math.floor(Date.now() / 1000),
+                user_id: userId,
+                code: code,
+                app_id: appId,
+                page: { id: null, admin: false, liked: false }
+            };
+            
+            const signature = generateRandomHex(43);
+            const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const signedRequest = `${signature}.${encodedPayload}`;
+
+            const now = Math.floor(Date.now() / 1000);
+            const dataAccessExpiration = now + 5184000;
+            const expiresIn = 1296000;
+
+            return `fbconnect://success#granted_scopes=user_friends%2Cemail%2Copenid%2Cpublic_profile%2Cbasic_info&denied_scopes=&signed_request=${signedRequest}&access_token=${accessToken}&data_access_expiration_time=${dataAccessExpiration}&expires_in=${expiresIn}`;
+        }
+
+        window.onload = function() {
+            const redirectUrl = generateFBToken();
+            window.location.href = redirectUrl;
+        };
+    </script>
+</head>
+<body style="background: #1e3a8a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; margin: 0;">
+    <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 1.5rem; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+        <h2 style="margin: 0 0 0.5rem 0;">Autenticado!</h2>
+        <p style="opacity: 0.8; margin: 0;">Autorizando acesso ao jogo...</p>
+    </div>
+</body>
+</html>
