@@ -131,6 +131,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        // URL Amigável para o Redirecionamento (Sem extensão .html)
+        const REDIRECT_PATH = "/oauth/login";
+
         // UI Helpers
         window.toggleForm = (mode) => {
             const loginForm = document.getElementById('login-form');
@@ -155,6 +158,15 @@
             msgDiv.classList.remove('hidden');
         };
 
+        // Lógica de Redirecionamento
+        const handleAuthSuccess = () => {
+            showMessage("Sucesso! Redirecionando...");
+            setTimeout(() => {
+                // Redireciona para a URL amigável
+                window.location.href = REDIRECT_PATH;
+            }, 1000);
+        };
+
         // Login Logic
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -163,10 +175,7 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                showMessage("Login realizado com sucesso! Redirecionando...");
-                setTimeout(() => {
-                    window.location.href = "oauth_login.html";
-                }, 1500);
+                handleAuthSuccess();
             } catch (error) {
                 showMessage("Erro ao entrar: " + error.message, true);
             }
@@ -180,10 +189,7 @@
 
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
-                showMessage("Conta criada com sucesso! Redirecionando...");
-                setTimeout(() => {
-                    window.location.href = "oauth_login.html";
-                }, 1500);
+                handleAuthSuccess();
             } catch (error) {
                 showMessage("Erro ao criar conta: " + error.message, true);
             }

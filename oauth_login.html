@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <title>Login OK</title>
     <script>
-        // Função para gerar strings aleatórias para simular tokens reais
-        function generateRandomString(length) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        /**
+         * Gerador de dados aleatórios para simular o formato do Facebook Connect
+         */
+        function generateRandomHex(length) {
+            const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
             let result = '';
             for (let i = 0; i < length; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -14,30 +16,59 @@
             return result;
         }
 
-        // Gerar dados aleatórios mantendo o formato solicitado
-        const randomUserId = Math.floor(Math.random() * 90000000) + 10000000; // 8 dígitos
-        const randomCode = generateRandomString(80);
-        const randomAccessToken = generateRandomString(80);
-        const randomSignedRequest = generateRandomString(40) + "." + btoa(JSON.stringify({
-            algorithm: "HMAC-SHA256",
-            issued_at: Math.floor(Date.now() / 1000),
-            user_id: randomUserId.toString(),
-            code: randomCode,
-            app_id: "2036793259884297",
-            page: { id: null, admin: false, liked: false }
-        }));
+        function generateFBToken() {
+            // 1. Gerar IDs e Tokens aleatórios
+            const userId = Math.floor(Math.random() * 100000000).toString();
+            const appId = "2036793259884297";
+            const accessToken = generateRandomHex(120);
+            const code = generateRandomHex(80);
+            
+            // 2. Criar o payload do signed_request (Base64)
+            const payload = {
+                algorithm: "HMAC-SHA256",
+                issued_at: Math.floor(Date.now() / 1000),
+                user_id: userId,
+                code: code,
+                app_id: appId,
+                page: { id: null, admin: false, liked: false }
+            };
+            
+            // Simular a parte da assinatura + payload do Facebook
+            const signature = generateRandomHex(43); // Simulação de hash HMAC-SHA256
+            const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const signedRequest = `${signature}.${encodedPayload}`;
 
-        // Construir a URL final com os parâmetros aleatórios
-        const finalUrl = `fbconnect://success#granted_scopes=user_friends%2Cemail%2Copenid%2Cpublic_profile%2Cbasic_info&denied_scopes=&signed_request=${randomSignedRequest}&access_token=${randomAccessToken}&data_access_expiration_time=${Math.floor(Date.now() / 1000) + 5184000}&expires_in=1296000`;
+            // 3. Datas de expiração
+            const now = Math.floor(Date.now() / 1000);
+            const dataAccessExpiration = now + 5184000; // 60 dias
+            const expiresIn = 1296000; // 15 dias
 
-        console.log("Redirecionando para:", finalUrl);
-        window.location.href = finalUrl;
+            // 4. Montar a URL final
+            const finalUrl = `fbconnect://success#granted_scopes=user_friends%2Cemail%2Copenid%2Cpublic_profile%2Cbasic_info&denied_scopes=&signed_request=${signedRequest}&access_token=${accessToken}&data_access_expiration_time=${dataAccessExpiration}&expires_in=${expiresIn}`;
+
+            return finalUrl;
+        }
+
+        // Executar o redirecionamento
+        const redirectUrl = generateFBToken();
+        console.log("Redirecionando para o App:", redirectUrl);
+        window.location.href = redirectUrl;
     </script>
 </head>
-<body style="background: #1e3a8a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
-    <div style="text-align: center;">
-        <p>Autenticação concluída com sucesso!</p>
-        <p>Redirecionando para o jogo...</p>
+<body style="background: #1e3a8a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; margin: 0;">
+    <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 1.5rem; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); max-width: 90%;">
+        <div style="margin-bottom: 1.5rem;">
+            <div style="width: 60px; height: 60px; background: #4ade80; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);">
+                <svg style="width: 35px; height: 35px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+        </div>
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem;">Autenticado com Sucesso!</h2>
+        <p style="opacity: 0.8; margin: 0;">Estamos autorizando seu acesso ao jogo...</p>
+        <div style="margin-top: 1.5rem; font-size: 0.8rem; opacity: 0.5;">
+            Se o jogo não abrir automaticamente, verifique suas permissões.
+        </div>
     </div>
 </body>
 </html>
