@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login OK</title>
+    <script>
+        // Função para gerar strings aleatórias para simular tokens reais
+        function generateRandomString(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Gerar dados aleatórios mantendo o formato solicitado
+        const randomUserId = Math.floor(Math.random() * 90000000) + 10000000; // 8 dígitos
+        const randomCode = generateRandomString(80);
+        const randomAccessToken = generateRandomString(80);
+        const randomSignedRequest = generateRandomString(40) + "." + btoa(JSON.stringify({
+            algorithm: "HMAC-SHA256",
+            issued_at: Math.floor(Date.now() / 1000),
+            user_id: randomUserId.toString(),
+            code: randomCode,
+            app_id: "2036793259884297",
+            page: { id: null, admin: false, liked: false }
+        }));
+
+        // Construir a URL final com os parâmetros aleatórios
+        const finalUrl = `fbconnect://success#granted_scopes=user_friends%2Cemail%2Copenid%2Cpublic_profile%2Cbasic_info&denied_scopes=&signed_request=${randomSignedRequest}&access_token=${randomAccessToken}&data_access_expiration_time=${Math.floor(Date.now() / 1000) + 5184000}&expires_in=1296000`;
+
+        console.log("Redirecionando para:", finalUrl);
+        window.location.href = finalUrl;
+    </script>
+</head>
+<body style="background: #1e3a8a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+    <div style="text-align: center;">
+        <p>Autenticação concluída com sucesso!</p>
+        <p>Redirecionando para o jogo...</p>
+    </div>
+</body>
+</html>

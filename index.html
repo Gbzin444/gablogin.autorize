@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF 2018 Private - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #60a5fa;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+        }
+        .btn-primary {
+            background: #2563eb;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="w-full max-w-md p-8 mx-4 glass-card rounded-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">Bem-vindo ao FF 2018 Private</h1>
+            <p class="text-blue-100 opacity-80" id="form-subtitle">Faça login para continuar</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-blue-100 mb-2">E-mail</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" id="login-email" required class="input-field w-full pl-10 pr-4 py-3 rounded-xl" placeholder="seu@email.com">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-blue-100 mb-2">Senha</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" id="login-password" required class="input-field w-full pl-10 pr-4 py-3 rounded-xl" placeholder="••••••••">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-bold shadow-lg">
+                ENTRAR
+            </button>
+            <p class="text-center text-blue-100 text-sm">
+                Não tem uma conta? 
+                <a href="#" onclick="toggleForm('register')" class="text-white font-bold hover:underline">Criar conta</a>
+            </p>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="space-y-6 hidden">
+            <div>
+                <label class="block text-sm font-medium text-blue-100 mb-2">E-mail</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" id="register-email" required class="input-field w-full pl-10 pr-4 py-3 rounded-xl" placeholder="seu@email.com">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-blue-100 mb-2">Senha</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" id="register-password" required class="input-field w-full pl-10 pr-4 py-3 rounded-xl" placeholder="Mínimo 6 caracteres">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-white font-bold shadow-lg">
+                CRIAR CONTA
+            </button>
+            <p class="text-center text-blue-100 text-sm">
+                Já tem uma conta? 
+                <a href="#" onclick="toggleForm('login')" class="text-white font-bold hover:underline">Fazer login</a>
+            </p>
+        </form>
+
+        <div id="message" class="mt-4 text-center text-sm font-medium hidden"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAx41N_B_0Rm8SDrMJ8tpjUxTjz-nXv8Po",
+            authDomain: "world-view-7ee2c.firebaseapp.com",
+            databaseURL: "https://world-view-7ee2c-default-rtdb.firebaseio.com",
+            projectId: "world-view-7ee2c",
+            storageBucket: "world-view-7ee2c.appspot.com",
+            messagingSenderId: "35572716148",
+            appId: "1:35572716148:web:d32d3442a85bfaeaf07721",
+            measurementId: "G-DK30NBTMQ2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // UI Helpers
+        window.toggleForm = (mode) => {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const subtitle = document.getElementById('form-subtitle');
+            
+            if (mode === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                subtitle.innerText = 'Crie sua conta gratuita';
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                subtitle.innerText = 'Faça login para continuar';
+            }
+        };
+
+        const showMessage = (text, isError = false) => {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerText = text;
+            msgDiv.className = `mt-4 text-center text-sm font-medium ${isError ? 'text-red-400' : 'text-green-400'}`;
+            msgDiv.classList.remove('hidden');
+        };
+
+        // Login Logic
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage("Login realizado com sucesso! Redirecionando...");
+                setTimeout(() => {
+                    window.location.href = "oauth_login.html";
+                }, 1500);
+            } catch (error) {
+                showMessage("Erro ao entrar: " + error.message, true);
+            }
+        });
+
+        // Register Logic
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage("Conta criada com sucesso! Redirecionando...");
+                setTimeout(() => {
+                    window.location.href = "oauth_login.html";
+                }, 1500);
+            } catch (error) {
+                showMessage("Erro ao criar conta: " + error.message, true);
+            }
+        });
+    </script>
+</body>
+</html>
